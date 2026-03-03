@@ -148,7 +148,7 @@ export function MessagesPage() {
     <div>
       <Box className="flex justify-between items-center mb-4">
         <Box>
-          <Button size="small" onClick={() => navigate('/conexoes')} className="mb-2">
+          <Button size="small" onClick={() => navigate('/conexoes')} className="mb-25">
             ← Voltar às conexões
           </Button>
           <Typography variant="h4">Mensagens</Typography>

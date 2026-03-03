@@ -1,0 +1,46 @@
+/**
+ * Estilos globais reutilizáveis no projeto.
+ * Use as classes nos componentes em vez de estilos inline.
+ */
+
+/* Espaçamento entre blocos de formulário (ex.: link abaixo do botão) */
+.mt-25 {
+  margin-top: 1.5rem !important;
+}
+
+.mb-25 {
+  margin-bottom: 1.5rem !important;
+}
+
+/* Centralização de texto */
+.text-center {
+  text-align: center;
+}
+
+/* Espaçamento superior para seções */
+.mt-section {
+  margin-top: 2rem;
+}
+
+/* Espaçamento inferior para seções */
+.mb-section {
+  margin-bottom: 2rem;
+}
+
+.m-25 {
+  margin: 25px !important;
+}
+
+/* Links (ex.: Cadastre-se, Entrar, Voltar) – mesma linha do tema escuro */
+a {
+  color: #424242;
+}
+a:hover {
+  color: #212121;
+}
+
+/* Estilos para o header */
+.header {
+  background-color: #252525 !important;
+  box-shadow: inset -4px 12px 8px 13px rgba(0, 0, 0, .2);
+}

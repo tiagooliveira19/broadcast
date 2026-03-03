@@ -3,9 +3,11 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { CssBaseline, ThemeProvider } from '@mui/material'
 import { AuthProvider } from './contexts/AuthContext'
+import { HeaderActionProvider } from './contexts/HeaderActionContext'
 import App from './App'
 import { theme } from './theme'
 import './style.css'
+import './styles/global.css'
 
 createRoot(document.getElementById('app')!).render(
   <StrictMode>
@@ -13,7 +15,9 @@ createRoot(document.getElementById('app')!).render(
       <CssBaseline />
       <BrowserRouter>
         <AuthProvider>
-          <App />
+          <HeaderActionProvider>
+            <App />
+          </HeaderActionProvider>
         </AuthProvider>
       </BrowserRouter>
     </ThemeProvider>

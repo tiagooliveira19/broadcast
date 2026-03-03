@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Typography,
@@ -16,20 +16,22 @@ import {
   Box,
 } from '@mui/material'
 import { useConnections } from '../hooks/useConnections'
+import { useHeaderAction } from '../contexts/HeaderActionContext'
 
 export function ConnectionsPage() {
   const navigate = useNavigate()
   const { connections, loading, add, update, remove } = useConnections()
+  const { setHeaderAction } = useHeaderAction()
   const [openAdd, setOpenAdd] = useState(false)
   const [openEdit, setOpenEdit] = useState<{ id: string; name: string } | null>(null)
   const [openDelete, setOpenDelete] = useState<{ id: string; name: string } | null>(null)
   const [name, setName] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  const handleOpenAdd = () => {
+  const handleOpenAdd = useCallback(() => {
     setName('')
     setOpenAdd(true)
-  }
+  }, [])
 
   const handleAdd = async () => {
     if (!name.trim()) return
@@ -73,6 +75,16 @@ export function ConnectionsPage() {
     }
   }
 
+  useEffect(() => {
+    setHeaderAction({
+      label: 'Nova conexão',
+      onClick: handleOpenAdd,
+      className: 'font-semibold uppercase tracking-wide',
+      sx: { fontSize: '0.875rem', '&:hover': { opacity: 1 }, marginLeft: '25px' },
+    })
+    return () => setHeaderAction(null)
+  }, [setHeaderAction, handleOpenAdd])
+
   if (loading) {
     return (
       <Box className="flex justify-center p-8">
@@ -83,11 +95,8 @@ export function ConnectionsPage() {
 
   return (
     <div>
-      <Box className="flex justify-between items-center mb-4">
+      <Box className="mb-4">
         <Typography variant="h4">Conexões</Typography>
-        <Button variant="contained" onClick={handleOpenAdd}>
-          Nova conexão
-        </Button>
       </Box>
 
       <List>

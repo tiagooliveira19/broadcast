@@ -17,6 +17,14 @@ import {
 } from '@mui/material'
 import { useContacts } from '../hooks/useContacts'
 
+/** Máscara (11) 98765-4321 – até 11 dígitos */
+function formatPhone(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11)
+  if (digits.length <= 2) return digits ? `(${digits}` : ''
+  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
+}
+
 export function ContactsPage() {
   const { connectionId } = useParams()
   const navigate = useNavigate()
@@ -48,7 +56,7 @@ export function ContactsPage() {
   const handleOpenEdit = (id: string, currentName: string, currentPhone: string) => {
     setOpenEdit({ id, name: currentName, phone: currentPhone })
     setName(currentName)
-    setPhone(currentPhone)
+    setPhone(formatPhone(currentPhone))
   }
 
   const handleEdit = async () => {
@@ -91,7 +99,7 @@ export function ContactsPage() {
     <div>
       <Box className="flex justify-between items-center mb-4">
         <Box>
-          <Button size="small" onClick={() => navigate('/conexoes')} className="mb-2">
+          <Button size="small" onClick={() => navigate('/conexoes')} className="mb-25">
             ← Voltar às conexões
           </Button>
           <Typography variant="h4">Contatos</Typography>
@@ -136,9 +144,11 @@ export function ContactsPage() {
           <TextField
             label="Telefone"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => setPhone(formatPhone(e.target.value))}
+            placeholder="(11) 98765-4321"
             fullWidth
             margin="dense"
+            inputProps={{ inputMode: 'numeric', maxLength: 16 }}
           />
         </DialogContent>
         <DialogActions>
@@ -167,9 +177,11 @@ export function ContactsPage() {
           <TextField
             label="Telefone"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => setPhone(formatPhone(e.target.value))}
+            placeholder="(11) 98765-4321"
             fullWidth
             margin="dense"
+            inputProps={{ inputMode: 'numeric', maxLength: 16 }}
           />
         </DialogContent>
         <DialogActions>
