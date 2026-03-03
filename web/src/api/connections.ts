@@ -69,15 +69,26 @@ export async function deleteConnection(connectionId: string): Promise<void> {
   await deleteDoc(doc(db, COLLECTION, connectionId))
 }
 
-export async function deleteConnectionWithCascade(connectionId: string): Promise<void> {
+export async function deleteConnectionWithCascade(
+  clientId: string,
+  connectionId: string,
+): Promise<void> {
   const contactsSnap = await getDocs(
-    query(collection(db, 'contacts'), where('connectionId', '==', connectionId)),
+    query(
+      collection(db, 'contacts'),
+      where('clientId', '==', clientId),
+      where('connectionId', '==', connectionId),
+    ),
   )
   for (const d of contactsSnap.docs) {
     await deleteDoc(d.ref)
   }
   const messagesSnap = await getDocs(
-    query(collection(db, 'messages'), where('connectionId', '==', connectionId)),
+    query(
+      collection(db, 'messages'),
+      where('clientId', '==', clientId),
+      where('connectionId', '==', connectionId),
+    ),
   )
   for (const d of messagesSnap.docs) {
     await deleteDoc(d.ref)

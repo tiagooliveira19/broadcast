@@ -244,11 +244,12 @@ export function MessagesPage() {
             />
           )}
         </DialogContent>
-        <DialogActions>
+        <DialogActions className="flex-wrap gap-2">
           <Button onClick={() => setOpenForm(false)}>Cancelar</Button>
           <Button
             onClick={handleSaveDraft}
             disabled={submitting || !body.trim()}
+            title="Salva como rascunho para editar ou enviar depois"
           >
             {submitting ? 'Salvando...' : 'Salvar rascunho'}
           </Button>
@@ -257,7 +258,7 @@ export function MessagesPage() {
             variant="contained"
             disabled={submitting || !body.trim() || (scheduleMode && !scheduledAt)}
           >
-            {submitting ? 'Salvando...' : scheduleMode ? 'Agendar' : 'Enviar (fake)'}
+            {submitting ? 'Salvando...' : scheduleMode ? 'Agendar' : 'Enviar'}
           </Button>
         </DialogActions>
       </Dialog>

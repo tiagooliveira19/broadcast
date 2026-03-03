@@ -37,7 +37,8 @@ export function useConnections() {
   }
 
   const remove = async (id: string) => {
-    await deleteConnectionWithCascade(id)
+    if (!clientId) return
+    await deleteConnectionWithCascade(clientId, id)
   }
 
   return { connections, loading, add, update, remove }

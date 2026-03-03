@@ -14,6 +14,7 @@ import {
   TextField,
   CircularProgress,
   Box,
+  Alert,
 } from '@mui/material'
 import { useConnections } from '../hooks/useConnections'
 import { useHeaderAction } from '../contexts/HeaderActionContext'
@@ -25,6 +26,7 @@ export function ConnectionsPage() {
   const [openAdd, setOpenAdd] = useState(false)
   const [openEdit, setOpenEdit] = useState<{ id: string; name: string } | null>(null)
   const [openDelete, setOpenDelete] = useState<{ id: string; name: string } | null>(null)
+  const [deleteError, setDeleteError] = useState('')
   const [name, setName] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
@@ -61,15 +63,19 @@ export function ConnectionsPage() {
   }
 
   const handleOpenDelete = (id: string, connectionName: string) => {
+    setDeleteError('')
     setOpenDelete({ id, name: connectionName })
   }
 
   const handleDelete = async () => {
     if (!openDelete) return
+    setDeleteError('')
     setSubmitting(true)
     try {
       await remove(openDelete.id)
       setOpenDelete(null)
+    } catch (err: unknown) {
+      setDeleteError(err instanceof Error ? err.message : 'Erro ao excluir.')
     } finally {
       setSubmitting(false)
     }
@@ -169,6 +175,11 @@ export function ConnectionsPage() {
       <Dialog open={!!openDelete} onClose={() => setOpenDelete(null)}>
         <DialogTitle>Excluir conexão?</DialogTitle>
         <DialogContent>
+          {deleteError && (
+            <Alert severity="error" className="mb-4">
+              {deleteError}
+            </Alert>
+          )}
           <Typography>
             Excluir &quot;{openDelete?.name}&quot;? Contatos e mensagens desta conexão também serão
             excluídos.
