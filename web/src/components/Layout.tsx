@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@mui/material'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../app/auth/hooks'
 import { useHeaderAction } from '../contexts/HeaderActionContext'
 
 type LayoutProps = {

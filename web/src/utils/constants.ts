@@ -1,4 +1,4 @@
-import type { MessageStatus } from '../types/message'
+import type { MessageStatus } from '../app/message/types'
 
 export const MESSAGE_STATUS_LABEL: Record<MessageStatus | 'all', string> = {
   all: 'Todas',

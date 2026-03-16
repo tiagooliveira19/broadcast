@@ -1,10 +1,10 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
-import { LoginPage } from '../pages/LoginPage'
-import { RegisterPage } from '../pages/RegisterPage'
-import { ConnectionsPage } from '../pages/ConnectionsPage'
-import { ContactsPage } from '../pages/ContactsPage'
-import { MessagesPage } from '../pages/MessagesPage'
+import { useAuth } from '../app/auth/hooks'
+import { LoginPage } from '../app/auth/LoginPage'
+import { RegisterPage } from '../app/auth/RegisterPage'
+import { ConnectionsPage } from '../app/connection/ConnectionsPage'
+import { ContactsPage } from '../app/contact/ContactsPage'
+import { MessagesPage } from '../app/message/MessagesPage'
 import { Layout } from '../components/Layout'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {

@@ -1,8 +1,10 @@
+import type { Timestamp } from 'firebase/firestore'
+
 export type Connection = {
   id: string
   clientId: string
   name: string
-  createdAt: { seconds: number; nanoseconds: number }
+  createdAt: Timestamp
 }
 
 export type ConnectionInput = {

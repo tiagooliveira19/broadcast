@@ -1,5 +1,5 @@
 import { Box, CircularProgress } from '@mui/material'
-import { useAuth } from './hooks/useAuth'
+import { useAuth } from './app/auth/hooks'
 import { AppRoutes } from './routes'
 
 export default function App() {

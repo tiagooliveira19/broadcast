@@ -19,21 +19,20 @@ import {
   FormControlLabel,
   Checkbox,
 } from '@mui/material'
-import { useMessages, type MessageStatusFilter } from '../hooks/useMessages'
-import { useContacts } from '../hooks/useContacts'
-import { MESSAGE_STATUS_LABEL } from '../utils/constants'
-import type { Message } from '../types/message'
-
-function formatDate(ts: { seconds: number; nanoseconds: number } | null): string {
-  if (!ts) return '-'
-  return new Date(ts.seconds * 1000).toLocaleString('pt-BR')
-}
+import { useAuth } from '../auth/hooks'
+import { useContacts } from '../contact/hooks'
+import { useMessages, type MessageStatusFilter } from './hooks'
+import { createMessage, updateMessage, deleteMessage } from './api'
+import { MESSAGE_STATUS_LABEL } from '../../utils/constants'
+import { formatTimestamp, formatTimestampForInput } from '../../utils/date'
+import type { Message } from './types'
 
 export function MessagesPage() {
   const { connectionId } = useParams()
   const navigate = useNavigate()
+  const { clientId } = useAuth()
   const [statusFilter, setStatusFilter] = useState<MessageStatusFilter>('all')
-  const { messages, loading, add, update, remove } = useMessages(connectionId, statusFilter)
+  const { messages, loading } = useMessages(connectionId, statusFilter)
   const { contacts } = useContacts(connectionId)
 
   const [openForm, setOpenForm] = useState(false)
@@ -54,11 +53,11 @@ export function MessagesPage() {
   }
 
   const handleSend = async () => {
-    if (!body.trim()) return
+    if (!clientId || !connectionId || !body.trim()) return
     if (scheduleMode && !scheduledAt) return
     setSubmitting(true)
     try {
-      await add({
+      await createMessage(clientId, connectionId, {
         contactIds: selectedContactIds,
         body: body.trim(),
         status: scheduleMode ? 'scheduled' : 'sent',
@@ -71,10 +70,10 @@ export function MessagesPage() {
   }
 
   const handleSaveDraft = async () => {
-    if (!body.trim()) return
+    if (!clientId || !connectionId || !body.trim()) return
     setSubmitting(true)
     try {
-      await add({
+      await createMessage(clientId, connectionId, {
         contactIds: selectedContactIds,
         body: body.trim(),
         status: 'draft',
@@ -92,11 +91,7 @@ export function MessagesPage() {
     setBody(msg.body)
     setSelectedContactIds(msg.contactIds)
     setScheduleMode(msg.status === 'scheduled')
-    setScheduledAt(
-      msg.scheduledAt
-        ? new Date(msg.scheduledAt.seconds * 1000).toISOString().slice(0, 16)
-        : '',
-    )
+    setScheduledAt(formatTimestampForInput(msg.scheduledAt))
   }
 
   const handleEdit = async () => {
@@ -105,7 +100,7 @@ export function MessagesPage() {
     if (scheduleMode && !scheduledAt) return
     setSubmitting(true)
     try {
-      await update(openEdit.id, {
+      await updateMessage(openEdit.id, {
         contactIds: selectedContactIds,
         body: body.trim(),
         status: scheduleMode ? 'scheduled' : 'draft',
@@ -121,7 +116,7 @@ export function MessagesPage() {
     if (!openDelete) return
     setSubmitting(true)
     try {
-      await remove(openDelete.id)
+      await deleteMessage(openDelete.id)
       setOpenDelete(null)
     } finally {
       setSubmitting(false)
@@ -190,8 +185,8 @@ export function MessagesPage() {
               secondary={
                 <>
                   Status: {MESSAGE_STATUS_LABEL[m.status]} • Contatos: {m.contactIds.length}
-                  {m.scheduledAt && ` • Agendada: ${formatDate(m.scheduledAt)}`}
-                  {m.sentAt && ` • Enviada: ${formatDate(m.sentAt)}`}
+                  {m.scheduledAt && ` • Agendada: ${formatTimestamp(m.scheduledAt)}`}
+                  {m.sentAt && ` • Enviada: ${formatTimestamp(m.sentAt)}`}
                 </>
               }
             />

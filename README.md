@@ -7,6 +7,17 @@ Projeto com React (Vite + TypeScript), Firebase (Auth, Firestore, Functions), Ma
 - **web/** – Frontend (Vite + React + TypeScript)
 - **functions/** – Firebase Cloud Functions (agendamento de mensagens)
 
+### Frontend (web/src)
+
+O código do frontend está organizado por domínio em `web/src/app/`:
+
+- **app/connection/** – Conexões (api, hooks, página, tipos)
+- **app/contact/** – Contatos por conexão
+- **app/message/** – Mensagens (rascunho, envio, agendamento)
+- **app/auth/** – Autenticação (contexto, login, cadastro)
+
+Fora de `app/`: `api/firebase.ts`, `components/`, `contexts/`, `routes/`, `theme/`, `utils/` (constantes e helpers de data/timestamp).
+
 ## Configuração
 
 ### 1. Firebase

@@ -1,3 +1,5 @@
+import type { Timestamp } from 'firebase/firestore'
+
 export type MessageStatus = 'draft' | 'scheduled' | 'sent'
 
 export type Message = {
@@ -7,9 +9,9 @@ export type Message = {
   contactIds: string[]
   body: string
   status: MessageStatus
-  scheduledAt: { seconds: number; nanoseconds: number } | null
-  sentAt: { seconds: number; nanoseconds: number } | null
-  createdAt: { seconds: number; nanoseconds: number }
+  scheduledAt: Timestamp | null
+  sentAt: Timestamp | null
+  createdAt: Timestamp
 }
 
 export type MessageInput = {

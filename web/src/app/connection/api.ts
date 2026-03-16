@@ -10,21 +10,21 @@ import {
   onSnapshot,
   getDocs,
   serverTimestamp,
+  Timestamp,
   type Unsubscribe,
-  type Timestamp,
 } from 'firebase/firestore'
-import { db } from './firebase'
-import type { Connection, ConnectionInput } from '../types/connection'
+import { db } from '../../api/firebase'
+import { getTimestamp } from '../../utils/firestore'
+import type { Connection, ConnectionInput } from './types'
 
 const COLLECTION = 'connections'
 
 function connectionFromDoc(id: string, data: Record<string, unknown>): Connection {
-  const createdAt = data.createdAt as Timestamp
   return {
     id,
     clientId: data.clientId as string,
     name: data.name as string,
-    createdAt: createdAt ? { seconds: createdAt.seconds, nanoseconds: createdAt.nanoseconds } : { seconds: 0, nanoseconds: 0 },
+    createdAt: getTimestamp(data, 'createdAt') ?? Timestamp.fromMillis(0),
   }
 }
 

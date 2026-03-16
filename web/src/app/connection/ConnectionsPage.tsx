@@ -16,12 +16,19 @@ import {
   Box,
   Alert,
 } from '@mui/material'
-import { useConnections } from '../hooks/useConnections'
-import { useHeaderAction } from '../contexts/HeaderActionContext'
+import { useAuth } from '../auth/hooks'
+import { useHeaderAction } from '../../contexts/HeaderActionContext'
+import { useConnections } from './hooks'
+import {
+  createConnection,
+  updateConnection,
+  deleteConnectionWithCascade,
+} from './api'
 
 export function ConnectionsPage() {
   const navigate = useNavigate()
-  const { connections, loading, add, update, remove } = useConnections()
+  const { clientId } = useAuth()
+  const { connections, loading } = useConnections()
   const { setHeaderAction } = useHeaderAction()
   const [openAdd, setOpenAdd] = useState(false)
   const [openEdit, setOpenEdit] = useState<{ id: string; name: string } | null>(null)
@@ -36,10 +43,10 @@ export function ConnectionsPage() {
   }, [])
 
   const handleAdd = async () => {
-    if (!name.trim()) return
+    if (!clientId || !name.trim()) return
     setSubmitting(true)
     try {
-      await add({ name: name.trim() })
+      await createConnection(clientId, { name: name.trim() })
       setOpenAdd(false)
     } finally {
       setSubmitting(false)
@@ -55,7 +62,7 @@ export function ConnectionsPage() {
     if (!openEdit || !name.trim()) return
     setSubmitting(true)
     try {
-      await update(openEdit.id, { name: name.trim() })
+      await updateConnection(openEdit.id, { name: name.trim() })
       setOpenEdit(null)
     } finally {
       setSubmitting(false)
@@ -68,11 +75,11 @@ export function ConnectionsPage() {
   }
 
   const handleDelete = async () => {
-    if (!openDelete) return
+    if (!openDelete || !clientId) return
     setDeleteError('')
     setSubmitting(true)
     try {
-      await remove(openDelete.id)
+      await deleteConnectionWithCascade(clientId, openDelete.id)
       setOpenDelete(null)
     } catch (err: unknown) {
       setDeleteError(err instanceof Error ? err.message : 'Erro ao excluir.')

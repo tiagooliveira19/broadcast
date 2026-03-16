@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button, TextField, Typography, Box, Paper, Alert, CircularProgress } from '@mui/material'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from './hooks'
 
-export function LoginPage() {
+export function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { login, user } = useAuth()
+  const { register, user } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -20,10 +20,10 @@ export function LoginPage() {
     setError('')
     setLoading(true)
     try {
-      await login(email, password)
+      await register(email, password)
       navigate('/conexoes')
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Erro ao entrar.')
+      setError(err instanceof Error ? err.message : 'Erro ao cadastrar.')
     } finally {
       setLoading(false)
     }
@@ -33,7 +33,7 @@ export function LoginPage() {
     <Box className="min-h-screen flex items-center justify-center p-4">
       <Paper className="p-6 w-full max-w-md">
         <Typography variant="h5" className="mb-25">
-          Entrar
+          Cadastro
         </Typography>
         {error && (
           <Alert severity="error" className="mb-4">
@@ -64,12 +64,12 @@ export function LoginPage() {
                 Carregando
               </>
             ) : (
-              'Entrar'
+              'Cadastrar'
             )}
           </Button>
         </form>
         <Typography className="text-center mt-25">
-          Não tem conta? <Link to="/cadastro">Cadastre-se</Link>
+          Já tem conta? <Link to="/login">Entrar</Link>
         </Typography>
       </Paper>
     </Box>

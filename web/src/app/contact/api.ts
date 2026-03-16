@@ -9,25 +9,23 @@ import {
   orderBy,
   onSnapshot,
   serverTimestamp,
+  Timestamp,
   type Unsubscribe,
-  type Timestamp,
 } from 'firebase/firestore'
-import { db } from './firebase'
-import type { Contact, ContactInput } from '../types/contact'
+import { db } from '../../api/firebase'
+import { getTimestamp } from '../../utils/firestore'
+import type { Contact, ContactInput } from './types'
 
 const COLLECTION = 'contacts'
 
 function contactFromDoc(id: string, data: Record<string, unknown>): Contact {
-  const createdAt = data.createdAt as Timestamp
   return {
     id,
     clientId: data.clientId as string,
     connectionId: data.connectionId as string,
     name: data.name as string,
     phone: data.phone as string,
-    createdAt: createdAt
-      ? { seconds: createdAt.seconds, nanoseconds: createdAt.nanoseconds }
-      : { seconds: 0, nanoseconds: 0 },
+    createdAt: getTimestamp(data, 'createdAt') ?? Timestamp.fromMillis(0),
   }
 }
 

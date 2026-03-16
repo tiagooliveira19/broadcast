@@ -12,16 +12,11 @@ import {
   Timestamp,
   type Unsubscribe,
 } from 'firebase/firestore'
-import { db } from './firebase'
-import type { Message, MessageInput, MessageStatus } from '../types/message'
+import { db } from '../../api/firebase'
+import { getTimestamp } from '../../utils/firestore'
+import type { Message, MessageInput, MessageStatus } from './types'
 
 const COLLECTION = 'messages'
-
-function toTimestamp(obj: unknown): { seconds: number; nanoseconds: number } | null {
-  if (!obj) return null
-  const t = obj as { seconds: number; nanoseconds: number }
-  return { seconds: t.seconds, nanoseconds: t.nanoseconds }
-}
 
 function messageFromDoc(id: string, data: Record<string, unknown>): Message {
   return {
@@ -31,9 +26,9 @@ function messageFromDoc(id: string, data: Record<string, unknown>): Message {
     contactIds: (data.contactIds as string[]) ?? [],
     body: (data.body as string) ?? '',
     status: (data.status as MessageStatus) ?? 'draft',
-    scheduledAt: toTimestamp(data.scheduledAt),
-    sentAt: toTimestamp(data.sentAt),
-    createdAt: toTimestamp(data.createdAt) ?? { seconds: 0, nanoseconds: 0 },
+    scheduledAt: getTimestamp(data, 'scheduledAt'),
+    sentAt: getTimestamp(data, 'sentAt'),
+    createdAt: getTimestamp(data, 'createdAt') ?? Timestamp.fromMillis(0),
   }
 }
 

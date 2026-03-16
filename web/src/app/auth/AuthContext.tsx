@@ -6,8 +6,8 @@ import {
   signOut,
   type User,
 } from 'firebase/auth'
-import { auth } from '../api/firebase'
-import type { AuthContextValue } from '../types/auth'
+import { auth } from '../../api/firebase'
+import type { AuthContextValue } from './types'
 
 export const AuthContext = createContext<AuthContextValue | null>(null)
 

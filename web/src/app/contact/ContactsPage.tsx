@@ -15,7 +15,9 @@ import {
   CircularProgress,
   Box,
 } from '@mui/material'
-import { useContacts } from '../hooks/useContacts'
+import { useAuth } from '../auth/hooks'
+import { useContacts } from './hooks'
+import { createContact, updateContact, deleteContact } from './api'
 
 /** Máscara (11) 98765-4321 – até 11 dígitos */
 function formatPhone(value: string): string {
@@ -28,7 +30,8 @@ function formatPhone(value: string): string {
 export function ContactsPage() {
   const { connectionId } = useParams()
   const navigate = useNavigate()
-  const { contacts, loading, add, update, remove } = useContacts(connectionId)
+  const { clientId } = useAuth()
+  const { contacts, loading } = useContacts(connectionId)
   const [openAdd, setOpenAdd] = useState(false)
   const [openEdit, setOpenEdit] = useState<{ id: string; name: string; phone: string } | null>(null)
   const [openDelete, setOpenDelete] = useState<{ id: string; name: string } | null>(null)
@@ -43,10 +46,10 @@ export function ContactsPage() {
   }
 
   const handleAdd = async () => {
-    if (!name.trim() || !phone.trim()) return
+    if (!clientId || !connectionId || !name.trim() || !phone.trim()) return
     setSubmitting(true)
     try {
-      await add({ name: name.trim(), phone: phone.trim() })
+      await createContact(clientId, connectionId, { name: name.trim(), phone: phone.trim() })
       setOpenAdd(false)
     } finally {
       setSubmitting(false)
@@ -63,7 +66,7 @@ export function ContactsPage() {
     if (!openEdit || !name.trim() || !phone.trim()) return
     setSubmitting(true)
     try {
-      await update(openEdit.id, { name: name.trim(), phone: phone.trim() })
+      await updateContact(openEdit.id, { name: name.trim(), phone: phone.trim() })
       setOpenEdit(null)
     } finally {
       setSubmitting(false)
@@ -78,7 +81,7 @@ export function ContactsPage() {
     if (!openDelete) return
     setSubmitting(true)
     try {
-      await remove(openDelete.id)
+      await deleteContact(openDelete.id)
       setOpenDelete(null)
     } finally {
       setSubmitting(false)
