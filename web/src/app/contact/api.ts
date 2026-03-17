@@ -4,9 +4,6 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
-  query,
-  where,
-  orderBy,
   onSnapshot,
   serverTimestamp,
   Timestamp,
@@ -14,6 +11,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '../../api/firebase'
 import { getTimestamp } from '../../utils/firestore'
+import { queryContacts } from '../../utils/queries'
 import type { Contact, ContactInput } from './types'
 
 const COLLECTION = 'contacts'
@@ -34,13 +32,7 @@ export function subscribeContacts(
   connectionId: string,
   onData: (contacts: Contact[]) => void,
 ): Unsubscribe {
-  const q = query(
-    collection(db, COLLECTION),
-    where('clientId', '==', clientId),
-    where('connectionId', '==', connectionId),
-    orderBy('createdAt', 'desc'),
-  )
-  return onSnapshot(q, (snapshot) => {
+  return onSnapshot(queryContacts(clientId, connectionId), (snapshot) => {
     const contacts = snapshot.docs.map((d) =>
       contactFromDoc(d.id, d.data() as Record<string, unknown>),
     )

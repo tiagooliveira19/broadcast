@@ -4,9 +4,6 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
-  query,
-  where,
-  orderBy,
   onSnapshot,
   getDocs,
   serverTimestamp,
@@ -15,6 +12,11 @@ import {
 } from 'firebase/firestore'
 import { db } from '../../api/firebase'
 import { getTimestamp } from '../../utils/firestore'
+import {
+  queryConnections,
+  queryContactsByConnection,
+  queryMessagesByConnection,
+} from '../../utils/queries'
 import type { Connection, ConnectionInput } from './types'
 
 const COLLECTION = 'connections'
@@ -32,12 +34,7 @@ export function subscribeConnections(
   clientId: string,
   onData: (connections: Connection[]) => void,
 ): Unsubscribe {
-  const q = query(
-    collection(db, COLLECTION),
-    where('clientId', '==', clientId),
-    orderBy('createdAt', 'desc'),
-  )
-  return onSnapshot(q, (snapshot) => {
+  return onSnapshot(queryConnections(clientId), (snapshot) => {
     const connections = snapshot.docs.map((d) =>
       connectionFromDoc(d.id, d.data() as Record<string, unknown>),
     )
@@ -73,23 +70,11 @@ export async function deleteConnectionWithCascade(
   clientId: string,
   connectionId: string,
 ): Promise<void> {
-  const contactsSnap = await getDocs(
-    query(
-      collection(db, 'contacts'),
-      where('clientId', '==', clientId),
-      where('connectionId', '==', connectionId),
-    ),
-  )
+  const contactsSnap = await getDocs(queryContactsByConnection(clientId, connectionId))
   for (const d of contactsSnap.docs) {
     await deleteDoc(d.ref)
   }
-  const messagesSnap = await getDocs(
-    query(
-      collection(db, 'messages'),
-      where('clientId', '==', clientId),
-      where('connectionId', '==', connectionId),
-    ),
-  )
+  const messagesSnap = await getDocs(queryMessagesByConnection(clientId, connectionId))
   for (const d of messagesSnap.docs) {
     await deleteDoc(d.ref)
   }

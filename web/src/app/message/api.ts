@@ -4,9 +4,6 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
-  query,
-  where,
-  orderBy,
   onSnapshot,
   serverTimestamp,
   Timestamp,
@@ -14,6 +11,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '../../api/firebase'
 import { getTimestamp } from '../../utils/firestore'
+import { queryMessages } from '../../utils/queries'
 import type { Message, MessageInput, MessageStatus } from './types'
 
 const COLLECTION = 'messages'
@@ -38,27 +36,15 @@ export function subscribeMessages(
   statusFilter: MessageStatus | 'all',
   onData: (messages: Message[]) => void,
 ): Unsubscribe {
-  let q = query(
-    collection(db, COLLECTION),
-    where('clientId', '==', clientId),
-    where('connectionId', '==', connectionId),
-    orderBy('createdAt', 'desc'),
+  return onSnapshot(
+    queryMessages(clientId, connectionId, statusFilter),
+    (snapshot) => {
+      const messages = snapshot.docs.map((d) =>
+        messageFromDoc(d.id, d.data() as Record<string, unknown>),
+      )
+      onData(messages)
+    },
   )
-  if (statusFilter !== 'all') {
-    q = query(
-      collection(db, COLLECTION),
-      where('clientId', '==', clientId),
-      where('connectionId', '==', connectionId),
-      where('status', '==', statusFilter),
-      orderBy('createdAt', 'desc'),
-    )
-  }
-  return onSnapshot(q, (snapshot) => {
-    const messages = snapshot.docs.map((d) =>
-      messageFromDoc(d.id, d.data() as Record<string, unknown>),
-    )
-    onData(messages)
-  })
 }
 
 export async function createMessage(
