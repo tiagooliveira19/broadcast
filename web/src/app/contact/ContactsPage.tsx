@@ -15,7 +15,12 @@ import {
   CircularProgress,
   Box,
 } from '@mui/material'
+import PersonAddIcon from '@mui/icons-material/PersonAdd'
+import EditIcon from '@mui/icons-material/Edit'
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import { useAuth } from '../auth/hooks'
+import { useConnections } from '../connection/hooks'
+import { useSnackbar } from '../../contexts/SnackbarContext'
 import { useContacts } from './hooks'
 import { createContact, updateContact, deleteContact } from './api'
 
@@ -31,7 +36,10 @@ export function ContactsPage() {
   const { connectionId } = useParams()
   const navigate = useNavigate()
   const { clientId } = useAuth()
+  const { connections } = useConnections()
   const { contacts, loading } = useContacts(connectionId)
+  const { showSuccess } = useSnackbar()
+  const connectionName = connections.find((c) => c.id === connectionId)?.name ?? 'Conexão'
   const [openAdd, setOpenAdd] = useState(false)
   const [openEdit, setOpenEdit] = useState<{ id: string; name: string; phone: string } | null>(null)
   const [openDelete, setOpenDelete] = useState<{ id: string; name: string } | null>(null)
@@ -51,6 +59,7 @@ export function ContactsPage() {
     try {
       await createContact(clientId, connectionId, { name: name.trim(), phone: phone.trim() })
       setOpenAdd(false)
+      showSuccess('Contato criado.')
     } finally {
       setSubmitting(false)
     }
@@ -68,6 +77,7 @@ export function ContactsPage() {
     try {
       await updateContact(openEdit.id, { name: name.trim(), phone: phone.trim() })
       setOpenEdit(null)
+      showSuccess('Contato atualizado.')
     } finally {
       setSubmitting(false)
     }
@@ -83,6 +93,7 @@ export function ContactsPage() {
     try {
       await deleteContact(openDelete.id)
       setOpenDelete(null)
+      showSuccess('Contato excluído.')
     } finally {
       setSubmitting(false)
     }
@@ -106,32 +117,72 @@ export function ContactsPage() {
             ← Voltar às conexões
           </Button>
           <Typography variant="h4">Contatos</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {connectionName}
+          </Typography>
         </Box>
-        <Button variant="contained" onClick={handleOpenAdd}>
+        <Button variant="contained" startIcon={<PersonAddIcon />} onClick={handleOpenAdd}>
           Novo contato
         </Button>
       </Box>
 
-      <List>
-        {contacts.map((c) => (
-          <ListItem
-            key={c.id}
-            className="bg-gray-50 rounded-lg mb-2"
-            secondaryAction={
-              <ListItemSecondaryAction className="flex gap-1">
-                <Button size="small" onClick={() => handleOpenEdit(c.id, c.name, c.phone)}>
-                  Editar
-                </Button>
-                <Button size="small" color="error" onClick={() => handleOpenDelete(c.id, c.name)}>
-                  Excluir
-                </Button>
-              </ListItemSecondaryAction>
-            }
-          >
-            <ListItemText primary={c.name} secondary={c.phone} />
-          </ListItem>
-        ))}
-      </List>
+      {contacts.length === 0 ? (
+        <Box
+          sx={{
+            textAlign: 'center',
+            py: 6,
+            px: 2,
+            borderRadius: 2,
+            bgcolor: 'action.hover',
+          }}
+        >
+          <PersonAddIcon sx={{ fontSize: 56, color: 'text.secondary', mb: 2 }} />
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            Nenhum contato nesta conexão
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Adicione contatos para enviar mensagens.
+          </Typography>
+          <Button variant="contained" startIcon={<PersonAddIcon />} onClick={handleOpenAdd}>
+            Adicionar primeiro contato
+          </Button>
+        </Box>
+      ) : (
+        <List disablePadding>
+          {contacts.map((c) => (
+            <ListItem
+              key={c.id}
+              sx={{
+                bgcolor: 'grey.50',
+                borderRadius: 2,
+                mb: 1.5,
+                '&:hover': { bgcolor: 'grey.100' },
+              }}
+              secondaryAction={
+                <ListItemSecondaryAction sx={{ display: 'flex', gap: 0.5 }}>
+                  <Button
+                    size="small"
+                    startIcon={<EditIcon />}
+                    onClick={() => handleOpenEdit(c.id, c.name, c.phone)}
+                  >
+                    Editar
+                  </Button>
+                  <Button
+                    size="small"
+                    color="error"
+                    startIcon={<DeleteOutlineIcon />}
+                    onClick={() => handleOpenDelete(c.id, c.name)}
+                  >
+                    Excluir
+                  </Button>
+                </ListItemSecondaryAction>
+              }
+            >
+              <ListItemText primary={c.name} secondary={c.phone} />
+            </ListItem>
+          ))}
+        </List>
+      )}
 
       <Dialog open={openAdd} onClose={() => setOpenAdd(false)} fullWidth maxWidth="sm">
         <DialogTitle>Novo contato</DialogTitle>

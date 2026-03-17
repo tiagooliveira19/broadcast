@@ -19,8 +19,14 @@ import {
   FormControlLabel,
   Checkbox,
 } from '@mui/material'
+import AddIcon from '@mui/icons-material/Add'
+import EditIcon from '@mui/icons-material/Edit'
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
+import MessageIcon from '@mui/icons-material/Message'
 import { useAuth } from '../auth/hooks'
+import { useConnections } from '../connection/hooks'
 import { useContacts } from '../contact/hooks'
+import { useSnackbar } from '../../contexts/SnackbarContext'
 import { useMessages, type MessageStatusFilter } from './hooks'
 import { createMessage, updateMessage, deleteMessage } from './api'
 import { MESSAGE_STATUS_LABEL } from '../../utils/constants'
@@ -31,9 +37,12 @@ export function MessagesPage() {
   const { connectionId } = useParams()
   const navigate = useNavigate()
   const { clientId } = useAuth()
+  const { connections } = useConnections()
   const [statusFilter, setStatusFilter] = useState<MessageStatusFilter>('all')
   const { messages, loading } = useMessages(connectionId, statusFilter)
   const { contacts } = useContacts(connectionId)
+  const { showSuccess } = useSnackbar()
+  const connectionName = connections.find((c) => c.id === connectionId)?.name ?? 'Conexão'
 
   const [openForm, setOpenForm] = useState(false)
   const [openEdit, setOpenEdit] = useState<Message | null>(null)
@@ -64,6 +73,7 @@ export function MessagesPage() {
         scheduledAt: scheduleMode && scheduledAt ? new Date(scheduledAt) : null,
       })
       setOpenForm(false)
+      showSuccess(scheduleMode ? 'Mensagem agendada.' : 'Mensagem enviada.')
     } finally {
       setSubmitting(false)
     }
@@ -80,6 +90,7 @@ export function MessagesPage() {
         scheduledAt: null,
       })
       setOpenForm(false)
+      showSuccess('Rascunho salvo.')
     } finally {
       setSubmitting(false)
     }
@@ -107,6 +118,7 @@ export function MessagesPage() {
         scheduledAt: scheduleMode && scheduledAt ? new Date(scheduledAt) : null,
       })
       setOpenEdit(null)
+      showSuccess('Mensagem atualizada.')
     } finally {
       setSubmitting(false)
     }
@@ -118,6 +130,7 @@ export function MessagesPage() {
     try {
       await deleteMessage(openDelete.id)
       setOpenDelete(null)
+      showSuccess('Mensagem excluída.')
     } finally {
       setSubmitting(false)
     }
@@ -147,52 +160,98 @@ export function MessagesPage() {
             ← Voltar às conexões
           </Button>
           <Typography variant="h4">Mensagens</Typography>
+          <Typography variant="body2" color="text.secondary">
+            {connectionName}
+          </Typography>
         </Box>
-        <Button variant="contained" onClick={handleOpenForm}>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenForm}>
           Nova mensagem
         </Button>
       </Box>
 
-      <Tabs value={statusFilter} onChange={(_, v) => setStatusFilter(v)} className="mb-4">
+      <Tabs value={statusFilter} onChange={(_, v) => setStatusFilter(v)} sx={{ mb: 2 }}>
         <Tab label={MESSAGE_STATUS_LABEL.all} value="all" />
         <Tab label={MESSAGE_STATUS_LABEL.sent} value="sent" />
         <Tab label={MESSAGE_STATUS_LABEL.scheduled} value="scheduled" />
         <Tab label={MESSAGE_STATUS_LABEL.draft} value="draft" />
       </Tabs>
 
-      <List>
-        {messages.map((m) => (
-          <ListItem
-            key={m.id}
-            className="bg-gray-50 rounded-lg mb-2"
-            secondaryAction={
-              <ListItemSecondaryAction className="flex gap-1">
-                {m.status !== 'sent' && (
-                  <>
-                    <Button size="small" onClick={() => handleOpenEdit(m)}>
-                      Editar
-                    </Button>
-                    <Button size="small" color="error" onClick={() => setOpenDelete(m)}>
-                      Excluir
-                    </Button>
-                  </>
-                )}
-              </ListItemSecondaryAction>
-            }
-          >
-            <ListItemText
-              primary={m.body.slice(0, 80) + (m.body.length > 80 ? '...' : '')}
-              secondary={
-                <>
-                  Status: {MESSAGE_STATUS_LABEL[m.status]} • Contatos: {m.contactIds.length}
-                  {m.scheduledAt && ` • Agendada: ${formatTimestamp(m.scheduledAt)}`}
-                  {m.sentAt && ` • Enviada: ${formatTimestamp(m.sentAt)}`}
-                </>
+      {messages.length === 0 ? (
+        <Box
+          sx={{
+            textAlign: 'center',
+            py: 6,
+            px: 2,
+            borderRadius: 2,
+            bgcolor: 'action.hover',
+          }}
+        >
+          <MessageIcon sx={{ fontSize: 56, color: 'text.secondary', mb: 2 }} />
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            {statusFilter === 'all'
+              ? 'Nenhuma mensagem ainda'
+              : `Nenhuma mensagem ${MESSAGE_STATUS_LABEL[statusFilter].toLowerCase()}`}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {statusFilter === 'all'
+              ? 'Crie uma mensagem para enviar ou agendar.'
+              : 'Altere a aba ou crie uma nova mensagem.'}
+          </Typography>
+          {statusFilter === 'all' && (
+            <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenForm}>
+              Nova mensagem
+            </Button>
+          )}
+        </Box>
+      ) : (
+        <List disablePadding>
+          {messages.map((m) => (
+            <ListItem
+              key={m.id}
+              sx={{
+                bgcolor: 'grey.50',
+                borderRadius: 2,
+                mb: 1.5,
+                '&:hover': { bgcolor: 'grey.100' },
+              }}
+              secondaryAction={
+                <ListItemSecondaryAction sx={{ display: 'flex', gap: 0.5 }}>
+                  {m.status !== 'sent' && (
+                    <>
+                      <Button
+                        size="small"
+                        startIcon={<EditIcon />}
+                        onClick={() => handleOpenEdit(m)}
+                      >
+                        Editar
+                      </Button>
+                      <Button
+                        size="small"
+                        color="error"
+                        startIcon={<DeleteOutlineIcon />}
+                        onClick={() => setOpenDelete(m)}
+                      >
+                        Excluir
+                      </Button>
+                    </>
+                  )}
+                </ListItemSecondaryAction>
               }
-            />
-          </ListItem>
-        ))}
-      </List>
+            >
+              <ListItemText
+                primary={m.body.slice(0, 80) + (m.body.length > 80 ? '...' : '')}
+                secondary={
+                  <>
+                    Status: {MESSAGE_STATUS_LABEL[m.status]} • Contatos: {m.contactIds.length}
+                    {m.scheduledAt && ` • Agendada: ${formatTimestamp(m.scheduledAt)}`}
+                    {m.sentAt && ` • Enviada: ${formatTimestamp(m.sentAt)}`}
+                  </>
+                }
+              />
+            </ListItem>
+          ))}
+        </List>
+      )}
 
       <Dialog open={openForm} onClose={() => setOpenForm(false)} fullWidth maxWidth="sm">
         <DialogTitle>Nova mensagem</DialogTitle>

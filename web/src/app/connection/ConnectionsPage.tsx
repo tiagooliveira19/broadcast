@@ -16,8 +16,13 @@ import {
   Box,
   Alert,
 } from '@mui/material'
+import LinkIcon from '@mui/icons-material/Link'
+import MessageIcon from '@mui/icons-material/Message'
+import EditIcon from '@mui/icons-material/Edit'
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import { useAuth } from '../auth/hooks'
 import { useHeaderAction } from '../../contexts/HeaderActionContext'
+import { useSnackbar } from '../../contexts/SnackbarContext'
 import { useConnections } from './hooks'
 import {
   createConnection,
@@ -30,6 +35,7 @@ export function ConnectionsPage() {
   const { clientId } = useAuth()
   const { connections, loading } = useConnections()
   const { setHeaderAction } = useHeaderAction()
+  const { showSuccess, showError } = useSnackbar()
   const [openAdd, setOpenAdd] = useState(false)
   const [openEdit, setOpenEdit] = useState<{ id: string; name: string } | null>(null)
   const [openDelete, setOpenDelete] = useState<{ id: string; name: string } | null>(null)
@@ -48,6 +54,7 @@ export function ConnectionsPage() {
     try {
       await createConnection(clientId, { name: name.trim() })
       setOpenAdd(false)
+      showSuccess('Conexão criada.')
     } finally {
       setSubmitting(false)
     }
@@ -64,6 +71,7 @@ export function ConnectionsPage() {
     try {
       await updateConnection(openEdit.id, { name: name.trim() })
       setOpenEdit(null)
+      showSuccess('Conexão atualizada.')
     } finally {
       setSubmitting(false)
     }
@@ -81,8 +89,11 @@ export function ConnectionsPage() {
     try {
       await deleteConnectionWithCascade(clientId, openDelete.id)
       setOpenDelete(null)
+      showSuccess('Conexão excluída.')
     } catch (err: unknown) {
-      setDeleteError(err instanceof Error ? err.message : 'Erro ao excluir.')
+      const msg = err instanceof Error ? err.message : 'Erro ao excluir.'
+      setDeleteError(msg)
+      showError(msg)
     } finally {
       setSubmitting(false)
     }
@@ -112,32 +123,77 @@ export function ConnectionsPage() {
         <Typography variant="h4">Conexões</Typography>
       </Box>
 
-      <List>
-        {connections.map((c) => (
-          <ListItem
-            key={c.id}
-            className="bg-gray-50 rounded-lg mb-2"
-            secondaryAction={
-              <ListItemSecondaryAction className="flex gap-1">
-                <Button size="small" onClick={() => navigate(`/conexoes/${c.id}/contatos`)}>
-                  Contatos
-                </Button>
-                <Button size="small" onClick={() => navigate(`/conexoes/${c.id}/mensagens`)}>
-                  Mensagens
-                </Button>
-                <Button size="small" onClick={() => handleOpenEdit(c.id, c.name)}>
-                  Editar
-                </Button>
-                <Button size="small" color="error" onClick={() => handleOpenDelete(c.id, c.name)}>
-                  Excluir
-                </Button>
-              </ListItemSecondaryAction>
-            }
-          >
-            <ListItemText primary={c.name} />
-          </ListItem>
-        ))}
-      </List>
+      {connections.length === 0 ? (
+        <Box
+          sx={{
+            textAlign: 'center',
+            py: 6,
+            px: 2,
+            borderRadius: 2,
+            bgcolor: 'action.hover',
+          }}
+        >
+          <LinkIcon sx={{ fontSize: 56, color: 'text.secondary', mb: 2 }} />
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            Nenhuma conexão ainda
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Crie sua primeira conexão para organizar contatos e mensagens.
+          </Typography>
+          <Button variant="contained" onClick={handleOpenAdd}>
+            Criar primeira conexão
+          </Button>
+        </Box>
+      ) : (
+        <List disablePadding>
+          {connections.map((c) => (
+            <ListItem
+              key={c.id}
+              sx={{
+                bgcolor: 'grey.50',
+                borderRadius: 2,
+                mb: 1.5,
+                '&:hover': { bgcolor: 'grey.100' },
+              }}
+              secondaryAction={
+                <ListItemSecondaryAction sx={{ display: 'flex', gap: 0.5 }}>
+                  <Button
+                    size="small"
+                    startIcon={<LinkIcon />}
+                    onClick={() => navigate(`/conexoes/${c.id}/contatos`)}
+                  >
+                    Contatos
+                  </Button>
+                  <Button
+                    size="small"
+                    startIcon={<MessageIcon />}
+                    onClick={() => navigate(`/conexoes/${c.id}/mensagens`)}
+                  >
+                    Mensagens
+                  </Button>
+                  <Button
+                    size="small"
+                    startIcon={<EditIcon />}
+                    onClick={() => handleOpenEdit(c.id, c.name)}
+                  >
+                    Editar
+                  </Button>
+                  <Button
+                    size="small"
+                    color="error"
+                    startIcon={<DeleteOutlineIcon />}
+                    onClick={() => handleOpenDelete(c.id, c.name)}
+                  >
+                    Excluir
+                  </Button>
+                </ListItemSecondaryAction>
+              }
+            >
+              <ListItemText primary={c.name} />
+            </ListItem>
+          ))}
+        </List>
+      )}
 
       <Dialog open={openAdd} onClose={() => setOpenAdd(false)} fullWidth maxWidth="sm">
         <DialogTitle>Nova conexão</DialogTitle>

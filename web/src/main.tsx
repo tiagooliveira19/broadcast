@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { CssBaseline, ThemeProvider } from '@mui/material'
 import { AuthProvider } from './app/auth/AuthContext'
 import { HeaderActionProvider } from './contexts/HeaderActionContext'
+import { SnackbarProvider } from './contexts/SnackbarContext'
 import App from './App'
 import { theme } from './theme'
 import './style.css'
@@ -16,7 +17,9 @@ createRoot(document.getElementById('app')!).render(
       <BrowserRouter>
         <AuthProvider>
           <HeaderActionProvider>
-            <App />
+            <SnackbarProvider>
+              <App />
+            </SnackbarProvider>
           </HeaderActionProvider>
         </AuthProvider>
       </BrowserRouter>

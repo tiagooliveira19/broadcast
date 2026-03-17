@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button, TextField, Typography, Box, Paper, Alert, CircularProgress } from '@mui/material'
 import { useAuth } from './hooks'
+import { useSnackbar } from '../../contexts/SnackbarContext'
 
 export function LoginPage() {
   const [email, setEmail] = useState('')
@@ -9,6 +10,7 @@ export function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { login, user } = useAuth()
+  const { showError } = useSnackbar()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -23,7 +25,9 @@ export function LoginPage() {
       await login(email, password)
       navigate('/conexoes')
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Erro ao entrar.')
+      const msg = err instanceof Error ? err.message : 'Erro ao entrar.'
+      setError(msg)
+      showError(msg)
     } finally {
       setLoading(false)
     }

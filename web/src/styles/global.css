@@ -31,9 +31,10 @@
   margin: 25px !important;
 }
 
-/* Links (ex.: Cadastre-se, Entrar, Voltar) – mesma linha do tema escuro */
+/* Links (ex.: Cadastre-se, Entrar) – alinhado ao tema escuro do header */
 a {
   color: #424242;
+  text-decoration: none;
 }
 a:hover {
   color: #212121;
@@ -43,4 +44,5 @@ a:hover {
 .header {
   background-color: #252525 !important;
   box-shadow: inset -4px 12px 8px 13px rgba(0, 0, 0, .2);
+  border-radius: 0 !important;
 }
